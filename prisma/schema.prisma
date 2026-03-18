@@ -1,0 +1,52 @@
+// Prisma schema for Ethiopian Agriculture Media Monitoring
+// Uses SQLite for local dev; switch to PostgreSQL for production
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Source {
+  id        String    @id @default(cuid())
+  name      String
+  type      String    // "rss", "news_api", "twitter", etc.
+  url       String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  articles  Article[]
+}
+
+model Topic {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Article {
+  id              String    @id @default(cuid())
+  title           String
+  content         String
+  summary         String?
+  sourceId        String
+  source          Source    @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  url             String    @unique
+  publishedAt     DateTime
+  sentiment       String    // "positive", "neutral", "negative"
+  sentimentScore  Float     // 0-1 scale
+  sentimentReason String?   // Brief explanation from OpenAI
+  tags            String    // JSON array of tags/topics
+  keyTopics       String?   // JSON array of extracted topics
+  entities        String?   // JSON: locations, crops, organizations
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([publishedAt])
+  @@index([sentiment])
+  @@index([sourceId])
+}
