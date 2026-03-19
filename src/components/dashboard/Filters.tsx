@@ -1,5 +1,7 @@
 "use client";
 
+import { DatePicker } from "@/components/ui/date-picker";
+
 interface FiltersProps {
   dateFrom: string;
   dateTo: string;
@@ -25,20 +27,18 @@ export function Filters({
     <div className="flex flex-wrap items-center gap-4 p-5 rounded-xl border border-slate-700/80 bg-slate-800/30 backdrop-blur-sm">
       <div className="flex items-center gap-2">
         <label className="text-slate-400 text-sm">From</label>
-        <input
-          type="date"
+        <DatePicker
           value={dateFrom}
-          onChange={(e) => onDateFromChange(e.target.value)}
-          className="rounded-xl border border-slate-600 bg-slate-900/80 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-colors"
+          onChange={onDateFromChange}
+          placeholder="Start date"
         />
       </div>
       <div className="flex items-center gap-2">
         <label className="text-slate-400 text-sm">To</label>
-        <input
-          type="date"
+        <DatePicker
           value={dateTo}
-          onChange={(e) => onDateToChange(e.target.value)}
-          className="rounded-xl border border-slate-600 bg-slate-900/80 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-colors"
+          onChange={onDateToChange}
+          placeholder="End date"
         />
       </div>
       <div className="flex items-center gap-2">

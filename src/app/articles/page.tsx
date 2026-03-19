@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ArticleTable } from "@/components/articles/ArticleTable";
 import { Pagination } from "@/components/articles/Pagination";
+import { DatePicker } from "@/components/ui/date-picker";
 import { format, subDays } from "date-fns";
 
 const PAGE_SIZE = 20;
@@ -77,17 +78,15 @@ export default function ArticlesPage() {
           >
             Export CSV
           </a>
-          <input
-            type="date"
+          <DatePicker
             value={dateFrom}
-            onChange={(e) => resetPageAndFetch(() => setDateFrom(e.target.value))}
-            className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+            onChange={(v) => resetPageAndFetch(() => setDateFrom(v))}
+            placeholder="From date"
           />
-          <input
-            type="date"
+          <DatePicker
             value={dateTo}
-            onChange={(e) => resetPageAndFetch(() => setDateTo(e.target.value))}
-            className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+            onChange={(v) => resetPageAndFetch(() => setDateTo(v))}
+            placeholder="To date"
           />
           <select
             value={sentiment}
