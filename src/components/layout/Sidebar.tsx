@@ -1,6 +1,7 @@
 "use client";
 
 import { SignedOut } from "@daveyplate/better-auth-ui";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserProfileCard } from "./UserProfileCard";
@@ -18,13 +19,22 @@ export function Sidebar() {
   return (
     <aside className="w-64 h-screen sticky top-0 flex flex-col shrink-0 bg-slate-900/95 backdrop-blur-sm text-slate-100 border-r border-slate-700/80">
       <div className="shrink-0 p-6 border-b border-slate-700/80">
-        <Link href="/" className="block group">
-          <h1 className="text-xl font-bold text-emerald-400 group-hover:text-emerald-300 transition-colors">
-            AgriMonitor
-          </h1>
-          <p className="text-xs text-slate-500 mt-1 group-hover:text-slate-400 transition-colors">
-            Ethiopian Agriculture
-          </p>
+        <Link href="/" className="flex items-center gap-3 group">
+          <Image
+            src="/logo.png"
+            alt="AgriMonitor"
+            width={40}
+            height={40}
+            className="shrink-0"
+          />
+          <div>
+            <h1 className="text-xl font-bold text-emerald-400 group-hover:text-emerald-300 transition-colors">
+              AgriMonitor
+            </h1>
+            <p className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">
+              Ethiopian Agriculture
+            </p>
+          </div>
         </Link>
       </div>
       <nav className="flex-1 min-h-0 overflow-y-auto p-4 space-y-1">

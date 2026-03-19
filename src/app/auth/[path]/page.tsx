@@ -1,5 +1,6 @@
 import { AuthView } from "@daveyplate/better-auth-ui";
 import { authViewPaths } from "@daveyplate/better-auth-ui/server";
+import Image from "next/image";
 import Link from "next/link";
 
 export const dynamicParams = false;
@@ -58,9 +59,16 @@ export default async function AuthPage({
         {/* Branding */}
         <Link
           href="/"
-          className="flex flex-col items-center gap-2 mb-8 group"
+          className="flex flex-col items-center gap-3 mb-8 group"
         >
-          <span className="text-3xl font-bold text-emerald-400 tracking-tight group-hover:text-emerald-300 transition-colors">
+          <Image
+            src="/logo.png"
+            alt="AgriMonitor"
+            width={64}
+            height={64}
+            className="shrink-0"
+          />
+          <span className="text-2xl font-bold text-emerald-400 tracking-tight group-hover:text-emerald-300 transition-colors">
             AgriMonitor
           </span>
           <span className="text-sm text-slate-500">
