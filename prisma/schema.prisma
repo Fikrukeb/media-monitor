@@ -10,12 +10,65 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Better Auth - core schema
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                   String    @id @default(cuid())
+  userId               String
+  accountId            String
+  providerId           String
+  accessToken          String?
+  refreshToken         String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                String?
+  idToken              String?
+  password             String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Source {
   id        String    @id @default(cuid())
   name      String
-  type      String    // "rss", "news_api", "twitter", etc.
-  url       String?
+  type      String    // "rss", "twitter", "facebook", "url", "mock"
+  url       String?   // RSS/URL, or null for social (use metadata)
+  metadata  String?   // JSON: { handle, pageId, selector, etc. }
   isActive  Boolean   @default(true)
+  isBuiltIn Boolean   @default(false) // Built-in sources can't be deleted
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   articles  Article[]
