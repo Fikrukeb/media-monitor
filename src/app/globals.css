@@ -1,9 +1,28 @@
 @import "tailwindcss";
 @import "@daveyplate/better-auth-ui/css";
 
+/* AgriMonitor design system - dark theme with emerald accent */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --card: #1e293b;
+  --card-foreground: #f1f5f9;
+  --popover: #1e293b;
+  --popover-foreground: #f1f5f9;
+  --primary: #10b981;
+  --primary-foreground: #022c22;
+  --secondary: #334155;
+  --secondary-foreground: #f1f5f9;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #134e4a;
+  --accent-foreground: #5eead4;
+  --destructive: #ef4444;
+  --destructive-foreground: #fef2f2;
+  --border: #334155;
+  --input: #334155;
+  --ring: #10b981;
+  --radius: 0.75rem;
 }
 
 @theme inline {
@@ -11,21 +30,41 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: calc(var(--radius) - 0.125rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.25rem);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--border);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* Form elements - consistent styling */
+input, select, textarea, button {
+  font-family: inherit;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted-foreground);
+  opacity: 0.7;
+}
+
+/* Focus ring - emerald accent */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Profile menu animation */
 @keyframes profile-menu-in {
   from {
     opacity: 0;
@@ -39,4 +78,35 @@ body {
 
 .profile-menu-enter {
   animation: profile-menu-in 0.15s ease-out forwards;
+}
+
+/* Auth page - ensure form elements match dark theme when classNames don't apply */
+.auth-page-container input,
+.auth-page-container select,
+.auth-page-container textarea {
+  background-color: rgb(15 23 42 / 0.8);
+  border-color: rgb(71 85 105);
+  color: rgb(241 245 249);
+}
+
+.auth-page-container input::placeholder,
+.auth-page-container textarea::placeholder {
+  color: rgb(100 116 139);
+}
+
+.auth-page-container input:focus,
+.auth-page-container select:focus,
+.auth-page-container textarea:focus {
+  border-color: rgb(16 185 129);
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(16 185 129 / 0.2);
+}
+
+.auth-page-container button[type="submit"]:not(:disabled) {
+  background-color: rgb(16 185 129);
+  color: white;
+}
+
+.auth-page-container button[type="submit"]:not(:disabled):hover {
+  background-color: rgb(52 211 153);
 }

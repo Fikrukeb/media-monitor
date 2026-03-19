@@ -22,14 +22,14 @@ export function Filters({
   isIngesting,
 }: FiltersProps) {
   return (
-    <div className="flex flex-wrap items-center gap-4 p-4 rounded-xl border border-slate-700 bg-slate-900/50">
+    <div className="flex flex-wrap items-center gap-4 p-5 rounded-xl border border-slate-700/80 bg-slate-800/30 backdrop-blur-sm">
       <div className="flex items-center gap-2">
         <label className="text-slate-400 text-sm">From</label>
         <input
           type="date"
           value={dateFrom}
           onChange={(e) => onDateFromChange(e.target.value)}
-          className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+          className="rounded-xl border border-slate-600 bg-slate-900/80 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-colors"
         />
       </div>
       <div className="flex items-center gap-2">
@@ -38,7 +38,7 @@ export function Filters({
           type="date"
           value={dateTo}
           onChange={(e) => onDateToChange(e.target.value)}
-          className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+          className="rounded-xl border border-slate-600 bg-slate-900/80 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-colors"
         />
       </div>
       <div className="flex items-center gap-2">
@@ -46,7 +46,7 @@ export function Filters({
         <select
           value={sentiment}
           onChange={(e) => onSentimentChange(e.target.value)}
-          className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+          className="rounded-xl border border-slate-600 bg-slate-900/80 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-colors"
         >
           <option value="">All</option>
           <option value="positive">Positive</option>
@@ -57,7 +57,7 @@ export function Filters({
       <button
         onClick={onIngest}
         disabled={isIngesting}
-        className="ml-auto px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="ml-auto px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-emerald-900/20"
       >
         {isIngesting ? "Ingesting…" : "Fetch New Content"}
       </button>

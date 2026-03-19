@@ -97,15 +97,18 @@ export default function DashboardPage() {
         />
 
         {loading ? (
-          <div className="mt-8 text-slate-400">Loading…</div>
+          <div className="mt-8 flex items-center gap-3 text-slate-400">
+            <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-t-emerald-500" />
+            Loading…
+          </div>
         ) : (stats?.total ?? 0) === 0 ? (
-          <div className="mt-8 rounded-xl border border-amber-500/30 bg-amber-950/20 p-8 text-center">
-            <p className="text-amber-200 text-lg mb-4">No content yet. Click &quot;Fetch New Content&quot; to load articles.</p>
-            <p className="text-slate-400 text-sm mb-6">Sources include FAO, Ethiopia Insight, mock agriculture news, and Twitter/Facebook (mock when API keys not set).</p>
+          <div className="mt-8 rounded-2xl border border-slate-700/80 bg-slate-800/30 backdrop-blur-sm p-12 text-center">
+            <p className="text-slate-200 text-lg mb-2">No content yet</p>
+            <p className="text-slate-500 text-sm mb-8">Click &quot;Fetch New Content&quot; to load articles from FAO, Ethiopia Insight, and other sources.</p>
             <button
               onClick={handleIngest}
               disabled={ingesting}
-              className="px-6 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium disabled:opacity-50"
+              className="px-8 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium disabled:opacity-50 shadow-lg shadow-emerald-900/20 transition-colors"
             >
               {ingesting ? "Fetching…" : "Fetch New Content"}
             </button>
