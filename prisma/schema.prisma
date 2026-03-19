@@ -1,12 +1,12 @@
 // Prisma schema for Ethiopian Agriculture Media Monitoring
-// Uses SQLite for local dev; switch to PostgreSQL for production
+// PostgreSQL for production (Vercel); use Neon/Supabase/Vercel Postgres for DATABASE_URL
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

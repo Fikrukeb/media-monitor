@@ -28,8 +28,8 @@ npm install
 cp .env.example .env
 # Add your OPENAI_API_KEY to .env
 
-# Initialize database
-npm run db:push
+# Initialize database (requires PostgreSQL - use Neon/Supabase free tier for local)
+npm run db:migrate
 
 # Optional: seed default source
 npm run db:seed
@@ -44,7 +44,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Variable | Description |
 |----------|-------------|
-| `DATABASE_URL` | SQLite: `file:./dev.db` or PostgreSQL connection string |
+| `DATABASE_URL` | PostgreSQL connection string (required; use pooled URL for Vercel) |
 | `OPENAI_API_KEY` | Required for sentiment analysis during ingestion |
 
 ## API Routes
@@ -75,12 +75,25 @@ src/
     └── prisma.ts      # DB client
 ```
 
-## Production
+## Production (Vercel)
 
-1. Switch to PostgreSQL: update `DATABASE_URL` and `provider` in `prisma/schema.prisma`
-2. Run `npm run db:migrate`
-3. Set `OPENAI_API_KEY`
-4. Deploy (Vercel, etc.)
+SQLite does not work on Vercel (ephemeral filesystem). Use PostgreSQL:
+
+1. **Create a PostgreSQL database** (free options):
+   - [Neon](https://neon.tech) – serverless Postgres
+   - [Vercel Postgres](https://vercel.com/storage/postgres) – add via Vercel dashboard
+   - [Supabase](https://supabase.com) – free tier
+
+2. **Add environment variables** in Vercel:
+   - `DATABASE_URL` – PostgreSQL connection string (use pooled URL for serverless)
+   - `BETTER_AUTH_SECRET` – `openssl rand -base64 32`
+   - `BETTER_AUTH_URL` – your production URL (e.g. `https://yourapp.vercel.app`)
+   - `NEXT_PUBLIC_APP_URL` – same as above
+   - `OPENAI_API_KEY` – required for sentiment analysis
+
+3. **Deploy** – migrations run automatically during build (`prisma migrate deploy`)
+
+For **local dev** with PostgreSQL, use a Neon/Supabase free database or Docker.
 
 ## License
 
