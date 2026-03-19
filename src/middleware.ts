@@ -27,6 +27,9 @@ export const config = {
   runtime: "nodejs",
   matcher: [
     "/",
-    "/((?!auth|api|_next|favicon).+)",
+    /*
+     * Exclude: /auth, /api, _next, favicon, logo.png
+     */
+    "/((?!auth|api|_next|favicon|logo\\.png).+)",
   ],
 };

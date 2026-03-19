@@ -59,21 +59,25 @@ export default async function AuthPage({
         {/* Branding */}
         <Link
           href="/"
-          className="flex flex-col items-center gap-3 mb-8 group"
+          className="flex items-center gap-4 mb-8 group"
         >
-          <Image
-            src="/logo.png"
-            alt="AgriMonitor"
-            width={64}
-            height={64}
-            className="shrink-0"
-          />
-          <span className="text-2xl font-bold text-emerald-400 tracking-tight group-hover:text-emerald-300 transition-colors">
-            AgriMonitor
-          </span>
-          <span className="text-sm text-slate-500">
-            Ethiopian Agriculture Media Monitoring
-          </span>
+          <div className="relative flex items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-950/30 p-3 shadow-lg shadow-emerald-900/20 group-hover:border-emerald-400/50 group-hover:shadow-emerald-500/10 transition-all duration-300">
+            <Image
+              src="/logo.png"
+              alt="AgriMonitor"
+              width={60}
+              height={60}
+              className="shrink-0"
+            />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-2xl font-bold text-emerald-400 tracking-tight group-hover:text-emerald-300 transition-colors">
+              AgriMonitor
+            </span>
+            <span className="text-xs text-slate-500 mt-0.5">
+              Ethiopian Agriculture Media Monitoring
+            </span>
+          </div>
         </Link>
 
         <AuthView path={path} classNames={authClassNames} />
