@@ -6,13 +6,10 @@ import { prisma } from "@/lib/prisma";
 import { fetchAllArticles } from "@/lib/ingestion/fetcher";
 import { analyzeSentiment } from "@/lib/openai";
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
-    const body = (await request.json().catch(() => ({}))) as { useMock?: boolean };
-    const useMock = body.useMock ?? true;
-
-    // Fetch raw articles
-    const rawArticles = await fetchAllArticles(useMock);
+    // Fetch raw articles (RSS, URL scrapes, Twitter/Facebook APIs when configured)
+    const rawArticles = await fetchAllArticles();
 
     const results = { processed: 0, skipped: 0, errors: 0 };
 

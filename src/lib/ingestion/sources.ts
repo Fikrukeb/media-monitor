@@ -1,6 +1,9 @@
 /**
  * RSS and news sources for Ethiopian agriculture content
- * Includes real RSS feeds and mock data for development
+ * Includes real RSS feeds and Google News RSS (aggregates many publishers).
+ *
+ * Note: Samsung “News” on devices is a proprietary aggregator without a public RSS API;
+ * Google News RSS fills a similar role here by surfacing many outlets in one place.
  */
 export interface RawArticle {
   title: string;
@@ -12,92 +15,72 @@ export interface RawArticle {
   publishedAt: Date;
 }
 
-// Real RSS feeds related to Ethiopia / agriculture (when available)
-export const RSS_FEEDS = [
+/** Google News RSS tuned to Ethiopia (gl / ceid) so results skew toward local and regional coverage. */
+export function googleNewsRssUrl(query: string): string {
+  const q = encodeURIComponent(query);
+  return `https://news.google.com/rss/search?q=${q}&hl=en&gl=ET&ceid=ET:en`;
+}
+
+export type BuiltinRssFeed = {
+  name: string;
+  url: string;
+  /**
+   * default: Ethiopia- or keyword-focused outlets — keep items if ag keywords match OR text mentions Ethiopia.
+   * agriculture-only: stricter — for broad aggregators (Google News) so politics/sports from the same region drop out.
+   */
+  filterMode?: "default" | "agriculture-only";
+};
+
+/**
+ * Built-in RSS feeds ingested when not overridden by an active DB source with the same URL.
+ * Mix of Ethiopian publishers and Google News topic searches (multi-outlet summaries/snippets).
+ */
+export const BUILTIN_RSS_FEEDS: BuiltinRssFeed[] = [
+  { name: "FAO Newsroom", url: "https://www.fao.org/feeds/fao-newsroom-rss" },
+  { name: "Ethiopia Insight", url: "https://www.ethiopia-insight.com/feed/" },
+  { name: "New Business Ethiopia", url: "https://newbusinessethiopia.com/feed/" },
+  { name: "Addis Fortune", url: "https://addisfortune.news/feed/" },
+  { name: "Capital Ethiopia", url: "https://www.capitalethiopia.com/feed/" },
+  { name: "AllAfrica — Ethiopia", url: "https://allafrica.com/ethiopia/feed/" },
+  { name: "Addis Standard", url: "https://addisstandard.com/feed/" },
+  { name: "Ethiopian Reporter", url: "https://www.ethiopianreporter.com/feed" },
   {
-    name: "AllAfrica - Ethiopia",
-    url: "https://allafrica.com/ethiopia/feed/",
-    type: "rss",
+    name: "Google News — Ethiopia agriculture",
+    url: googleNewsRssUrl("Ethiopia agriculture"),
+    filterMode: "agriculture-only",
   },
   {
-    name: "Ethiopian Reporter",
-    url: "https://www.ethiopianreporter.com/feed",
-    type: "rss",
+    name: "Google News — Ethiopian farmers & crops",
+    url: googleNewsRssUrl("Ethiopian farmers OR Ethiopia farming OR Ethiopia crops"),
+    filterMode: "agriculture-only",
   },
   {
-    name: "Addis Standard",
-    url: "https://addisstandard.com/feed/",
-    type: "rss",
+    name: "Google News — Ethiopia food security & livestock",
+    url: googleNewsRssUrl("Ethiopia food security OR Ethiopia livestock OR Ethiopia drought farmers"),
+    filterMode: "agriculture-only",
   },
 ];
 
-/**
- * Mock articles for development when RSS/APIs are unavailable
- * URLs point to real Ethiopian agriculture news sources
- */
-export const MOCK_ARTICLES: RawArticle[] = [
-  {
-    title: "Ethiopian Coffee Exports Surge Amid Global Demand",
-    content: "Ethiopia's coffee exports have reached record levels this quarter, driven by increased demand from European and Asian markets. The Ministry of Agriculture reported a 15% year-over-year increase in coffee production, with Oromia and Sidama regions leading output. Farmers are benefiting from improved irrigation and better access to fertilizers.",
-    url: "https://www.fao.org/ethiopia/news/en/#coffee",
-    sourceName: "Ethiopian Agriculture News",
-    sourceType: "mock",
-    publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-  },
-  {
-    title: "Drought Conditions Worsen in Somali Region",
-    content: "Prolonged drought in Ethiopia's Somali region has left thousands of livestock dead and threatened food security. Humanitarian organizations are calling for emergency aid. The FAO has pledged support for irrigation projects and drought-resistant crop varieties.",
-    url: "https://www.fao.org/emergencies/where-we-work/ETH/en/#drought",
-    sourceName: "Regional News",
-    sourceType: "mock",
-    publishedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-  },
-  {
-    title: "Teff Gains Popularity as Superfood in Western Markets",
-    content: "Ethiopian teff, a gluten-free grain, is gaining traction in health-conscious markets abroad. Exporters report growing interest from the US and EU. The government is investing in quality certification to meet international standards.",
-    url: "https://www.ethiopia-insight.com/#teff",
-    sourceName: "Agri Export Digest",
-    sourceType: "mock",
-    publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-  },
-  {
-    title: "Maize Harvest Exceeds Expectations in Amhara",
-    content: "Farmers in Amhara region report a bumper maize harvest following favorable rains. The regional agriculture bureau attributes success to improved seed varieties and extension services. Storage facilities are being expanded to handle the surplus.",
-    url: "https://newbusinessethiopia.com/#maize",
-    sourceName: "Regional Agriculture",
-    sourceType: "mock",
-    publishedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
-  },
-  {
-    title: "Livestock Vaccination Campaign Launched in Oromia",
-    content: "A nationwide livestock vaccination campaign has begun in Oromia to combat common livestock diseases. The Ministry of Agriculture partnered with international NGOs to provide vaccines for cattle, sheep, and goats. Farmers welcomed the initiative.",
-    url: "https://www.fao.org/ethiopia/news/en/#livestock",
-    sourceName: "Vet News Ethiopia",
-    sourceType: "mock",
-    publishedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-  },
-  {
-    title: "Sesame Export Revenue Declines Amid Price Volatility",
-    content: "Ethiopia's sesame exports have seen a 20% decline in revenue due to global price fluctuations. Traders are urging the government to diversify export markets. Some farmers are switching to other cash crops.",
-    url: "https://addisfortune.news/#sesame",
-    sourceName: "Export Monitor",
-    sourceType: "mock",
-    publishedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
-  },
-  {
-    title: "Irrigation Project Brings Hope to Tigray Farmers",
-    content: "A new irrigation scheme in Tigray is expected to benefit over 10,000 farming households. The project, funded by development partners, will enable year-round cultivation. Local officials say it will improve food security in the region.",
-    url: "https://www.fao.org/emergencies/where-we-work/ETH/en/#irrigation",
-    sourceName: "Development News",
-    sourceType: "mock",
-    publishedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-  },
-  {
-    title: "Khat Trade Faces Regulatory Scrutiny",
-    content: "The Ethiopian khat trade is under review as authorities consider new regulations. Export revenues from khat remain significant, but concerns about domestic consumption have prompted policy discussions. Farmers in Hararghe depend heavily on the crop.",
-    url: "https://www.ethiopia-insight.com/#khat",
-    sourceName: "Policy Watch",
-    sourceType: "mock",
-    publishedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
-  },
-];
+export type BuiltinDbSource = {
+  name: string;
+  type: string;
+  url: string | null;
+  metadata: string | null;
+  isBuiltIn: boolean;
+};
+
+/** Sources created by /api/init and prisma seed (RSS + global social placeholders). */
+export function getBuiltinDbSources(): BuiltinDbSource[] {
+  const rss: BuiltinDbSource[] = BUILTIN_RSS_FEEDS.map((f) => ({
+    name: f.name,
+    type: "rss",
+    url: f.url,
+    metadata: null,
+    isBuiltIn: true,
+  }));
+  const social: BuiltinDbSource[] = [
+    { name: "Twitter/X", type: "twitter", url: null, metadata: null, isBuiltIn: true },
+    { name: "Facebook", type: "facebook", url: null, metadata: null, isBuiltIn: true },
+  ];
+  return [...rss, ...social];
+}

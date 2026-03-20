@@ -1,48 +1,12 @@
 /**
- * Twitter/X fetcher - uses Twitter API v2 when TWITTER_BEARER_TOKEN is set
- * Falls back to mock data if no API key
+ * Twitter/X fetcher — uses Twitter API v2 when TWITTER_BEARER_TOKEN is set.
+ * Returns [] if there is no token or the request fails (no mock data).
  */
 import { matchesAgricultureKeywords } from "./keywords";
 import type { RawArticle } from "./sources";
 
-const MOCK_TWITTER_POSTS: RawArticle[] = [
-  {
-    title: "Ethiopian coffee exports hit record high this quarter. Great news for farmers in Oromia and Sidama! #Ethiopia #Coffee",
-    content: "Ethiopian coffee exports hit record high this quarter. Great news for farmers in Oromia and Sidama! #Ethiopia #Coffee",
-    url: "https://x.com/FAO",
-    sourceName: "Twitter/X",
-    sourceType: "twitter",
-    publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-  },
-  {
-    title: "Drought in Somali region continues to affect livestock. FAO and partners providing emergency feed. #Ethiopia #Agriculture",
-    content: "Drought in Somali region continues to affect livestock. FAO and partners providing emergency feed. #Ethiopia #Agriculture",
-    url: "https://x.com/FAOEthiopia",
-    sourceName: "Twitter/X",
-    sourceType: "twitter",
-    publishedAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
-  },
-  {
-    title: "Teff gaining popularity in EU markets. Ethiopian exporters see 20% growth in demand. #Teff #Ethiopia",
-    content: "Teff gaining popularity in EU markets. Ethiopian exporters see 20% growth in demand. #Teff #Ethiopia",
-    url: "https://x.com/FAOAfrica",
-    sourceName: "Twitter/X",
-    sourceType: "twitter",
-    publishedAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
-  },
-];
-
-export async function fetchTwitter(
-  handle?: string,
-  useMockFallback = true
-): Promise<RawArticle[]> {
+export async function fetchTwitter(handle?: string): Promise<RawArticle[]> {
   const token = process.env.TWITTER_BEARER_TOKEN;
-
-  if (!token && useMockFallback) {
-    return MOCK_TWITTER_POSTS.filter((p) =>
-      matchesAgricultureKeywords(`${p.title} ${p.content}`)
-    );
-  }
 
   if (!token) return [];
 
@@ -66,7 +30,7 @@ export async function fetchTwitter(
 
     if (!res.ok) {
       console.warn("Twitter API error:", res.status, await res.text());
-      return useMockFallback ? MOCK_TWITTER_POSTS : [];
+      return [];
     }
 
     const data = (await res.json()) as {
@@ -97,6 +61,6 @@ export async function fetchTwitter(
     return articles;
   } catch (error) {
     console.error("Twitter fetch error:", error);
-    return useMockFallback ? MOCK_TWITTER_POSTS : [];
+    return [];
   }
 }

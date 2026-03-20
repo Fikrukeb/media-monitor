@@ -3,8 +3,8 @@
  */
 import Parser from "rss-parser";
 import { prisma } from "@/lib/prisma";
-import { matchesAgricultureKeywords } from "./keywords";
-import { MOCK_ARTICLES, type RawArticle } from "./sources";
+import { matchesAgricultureKeywords, matchesGeneralAgricultureTerms } from "./keywords";
+import { BUILTIN_RSS_FEEDS, type RawArticle } from "./sources";
 import { fetchTwitter } from "./twitter";
 import { fetchFacebook } from "./facebook";
 import { fetchFromUrl } from "./url-scraper";
@@ -16,32 +16,39 @@ const parser = new Parser({
   },
 });
 
-// Built-in RSS feeds - use working feeds (many Ethiopia sites block bots or have broken feeds)
-const BUILTIN_RSS = [
-  { name: "FAO Newsroom", url: "https://www.fao.org/feeds/fao-newsroom-rss", type: "rss" },
-  { name: "Ethiopia Insight", url: "https://www.ethiopia-insight.com/feed/", type: "rss" },
-  { name: "New Business Ethiopia", url: "https://newbusinessethiopia.com/feed/", type: "rss" },
-  { name: "Addis Fortune", url: "https://addisfortune.news/feed/", type: "rss" },
-  { name: "Capital Ethiopia", url: "https://www.capitalethiopia.com/feed/", type: "rss" },
-];
+function resolveRssFilterMode(
+  url: string,
+  explicit?: "default" | "agriculture-only"
+): "default" | "agriculture-only" {
+  if (explicit) return explicit;
+  if (url.includes("news.google.com/rss")) return "agriculture-only";
+  return "default";
+}
+
+function isRssItemRelevant(text: string, mode: "default" | "agriculture-only"): boolean {
+  if (mode === "agriculture-only") {
+    return matchesAgricultureKeywords(text) || matchesGeneralAgricultureTerms(text);
+  }
+  return matchesAgricultureKeywords(text) || text.toLowerCase().includes("ethiopia");
+}
 
 async function fetchRssFeed(
   url: string,
   sourceName: string,
-  sourceId?: string
+  sourceId?: string,
+  filterMode?: "default" | "agriculture-only"
 ): Promise<RawArticle[]> {
   try {
     const feed = await parser.parseURL(url);
     const articles: RawArticle[] = [];
+    const mode = resolveRssFilterMode(url, filterMode);
 
     for (const item of feed.items ?? []) {
       const title = item.title ?? "";
       const content = item.contentSnippet ?? item.content ?? item.summary ?? "";
       const text = `${title} ${content}`;
 
-      // FAO/global feeds: include if agriculture-related; Ethiopia feeds: include all (filter later)
-      const isRelevant = matchesAgricultureKeywords(text) || text.toLowerCase().includes("ethiopia");
-      if (isRelevant) {
+      if (isRssItemRelevant(text, mode)) {
         articles.push({
           title,
           content: content.slice(0, 5000),
@@ -62,20 +69,14 @@ async function fetchRssFeed(
 }
 
 /**
- * Fetch articles from all configured sources
- * - Mock data FIRST (ensures content when external feeds fail)
+ * Fetch articles from all configured sources (real RSS/API/URL only — no mock content).
  * - DB sources (user-registered RSS, Twitter, Facebook, URL)
  * - Built-in RSS (if not in DB)
- * - Twitter/X (global + per-handle)
- * - Facebook (global + per-page)
+ * - Twitter/X (global + per-handle) when TWITTER_BEARER_TOKEN is set
+ * - Facebook (global + per-page) when FACEBOOK_ACCESS_TOKEN is set
  */
-export async function fetchAllArticles(useMockFallback = true): Promise<RawArticle[]> {
+export async function fetchAllArticles(): Promise<RawArticle[]> {
   const allArticles: RawArticle[] = [];
-
-  // 0. Always include mock data first - ensures dashboard has content when feeds fail
-  if (useMockFallback) {
-    allArticles.push(...MOCK_ARTICLES);
-  }
 
   // 1. Fetch from DB sources (user-registered)
   const dbSources = await prisma.source.findMany({
@@ -88,7 +89,7 @@ export async function fetchAllArticles(useMockFallback = true): Promise<RawArtic
       allArticles.push(...articles);
     } else if (source.type === "twitter") {
       const meta = source.metadata ? (JSON.parse(source.metadata) as { handle?: string }) : {};
-      const articles = await fetchTwitter(meta.handle, useMockFallback);
+      const articles = await fetchTwitter(meta.handle);
       articles.forEach((a) => {
         allArticles.push({ ...a, sourceName: source.name, sourceId: source.id });
       });
@@ -96,7 +97,7 @@ export async function fetchAllArticles(useMockFallback = true): Promise<RawArtic
       const meta = source.metadata
         ? (JSON.parse(source.metadata) as { pageId?: string; pageUrl?: string })
         : {};
-      const articles = await fetchFacebook(meta.pageId, meta.pageUrl, useMockFallback);
+      const articles = await fetchFacebook(meta.pageId, meta.pageUrl);
       articles.forEach((a) => {
         allArticles.push({ ...a, sourceName: source.name, sourceId: source.id });
       });
@@ -109,10 +110,12 @@ export async function fetchAllArticles(useMockFallback = true): Promise<RawArtic
   }
 
   // 2. Built-in RSS (if not already in DB)
-  const dbRssUrls = new Set(dbSources.filter((s) => s.type === "rss").map((s) => s.url));
-  for (const feed of BUILTIN_RSS) {
+  const dbRssUrls = new Set(
+    dbSources.filter((s) => s.type === "rss" && s.url).map((s) => s.url as string)
+  );
+  for (const feed of BUILTIN_RSS_FEEDS) {
     if (!dbRssUrls.has(feed.url)) {
-      const articles = await fetchRssFeed(feed.url, feed.name);
+      const articles = await fetchRssFeed(feed.url, feed.name, undefined, feed.filterMode);
       allArticles.push(...articles);
     }
   }
@@ -120,14 +123,14 @@ export async function fetchAllArticles(useMockFallback = true): Promise<RawArtic
   // 3. Global Twitter/X (if no twitter source in DB)
   const hasTwitterSource = dbSources.some((s) => s.type === "twitter");
   if (!hasTwitterSource) {
-    const articles = await fetchTwitter(undefined, useMockFallback);
+    const articles = await fetchTwitter(undefined);
     allArticles.push(...articles);
   }
 
   // 4. Global Facebook (if no facebook source in DB)
   const hasFacebookSource = dbSources.some((s) => s.type === "facebook");
   if (!hasFacebookSource) {
-    const articles = await fetchFacebook(undefined, undefined, useMockFallback);
+    const articles = await fetchFacebook(undefined, undefined);
     allArticles.push(...articles);
   }
 

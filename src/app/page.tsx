@@ -67,11 +67,7 @@ export default function DashboardPage() {
   const handleIngest = async () => {
     setIngesting(true);
     try {
-      const res = await fetch("/api/ingest", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ useMock: true }),
-      });
+      const res = await fetch("/api/ingest", { method: "POST" });
       if (res.ok) await fetchData();
     } catch (err) {
       console.error(err);

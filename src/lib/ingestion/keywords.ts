@@ -32,9 +32,66 @@ export const AGRICULTURE_KEYWORDS = [
 ];
 
 /**
+ * Broader English terms for aggregator feeds (e.g. Google News) where headlines
+ * may not include phrases like "Ethiopian agriculture" but are still farm/rural-food related.
+ */
+export const GENERAL_AGRICULTURE_TERMS = [
+  "agriculture",
+  "agricultural",
+  "agronomy",
+  "farmer",
+  "farmers",
+  "farming",
+  "livestock",
+  "pastoral",
+  "crop",
+  "crops",
+  "cultivation",
+  "cultivate",
+  "harvest",
+  "irrigation",
+  "fertilizer",
+  "fertiliser",
+  "cereal",
+  "maize",
+  "wheat",
+  "teff",
+  "sorghum",
+  "barley",
+  "millet",
+  "food security",
+  "rural development",
+  "fao",
+  "world food programme",
+  "wfp",
+  "ifad",
+  "veterinar",
+  "food aid",
+  "humanitarian food",
+  "drought",
+  "famine",
+  "khat",
+  "sesame",
+  "coffee",
+  "export crop",
+  "grain",
+  "horticulture",
+  "pesticide",
+  "seed variety",
+  "extension service",
+  "smallholder",
+  "pastoralist",
+];
+
+/**
  * Check if text contains any agriculture-related keywords (case-insensitive)
  */
 export function matchesAgricultureKeywords(text: string): boolean {
   const lower = text.toLowerCase();
   return AGRICULTURE_KEYWORDS.some((kw) => lower.includes(kw.toLowerCase()));
+}
+
+export function matchesGeneralAgricultureTerms(text: string): boolean {
+  const lower = text.toLowerCase();
+  return GENERAL_AGRICULTURE_TERMS.some((t) => lower.includes(t));
 }
